@@ -32,7 +32,7 @@ def load_cows(filename):
 
 
 # Problem 1
-def greedy_cow_transport(cows,limit=10):
+def greedy_cow_transport(cows, limit=10):
     """
     Uses a greedy heuristic to determine an allocation of cows that attempts to
     minimize the number of spaceship trips needed to transport all the cows. The
@@ -54,12 +54,21 @@ def greedy_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    t, cow = [], [tup for tup in sorted(cows.items(), key=lambda x: x[1])]
+    while cow:
+        r, i, trip = limit, len(cow), []
+        while r and i:
+            i -= 1
+            if cow[i][1] <= r:
+                r -= cow[i][1]
+                trip.append(cow[i][0])
+                del cow[i]
+        t.append(trip)
+    return t
 
 
 # Problem 2
-def brute_force_cow_transport(cows,limit=10):
+def brute_force_cow_transport(cows, limit=10):
     """
     Finds the allocation of cows that minimizes the number of spaceship trips
     via brute force.  The brute force algorithm should follow the following method:
@@ -79,10 +88,14 @@ def brute_force_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    trips = [c for c, w in cows.items() if w < limit]
+    for partition in get_partitions(cows):
+        if any(sum(cows[c] for c in trip) > limit for trip in partition):
+            continue
+        trips = partition if len(partition) <= len(trips) else trips
+    return trips
 
-        
+
 # Problem 3
 def compare_cow_transport_algorithms():
     """
@@ -97,8 +110,11 @@ def compare_cow_transport_algorithms():
     Returns:
     Does not return anything.
     """
-    # TODO: Your code here
-    pass
+    for transport in [greedy_cow_transport, brute_force_cow_transport]:
+        start = time.perf_counter_ns()
+        transport(cows, limit=20)
+        end = time.perf_counter_ns()
+        print(f'{str(transport).split()[1]}(): {(end - start) / 1e6:,.3f}ms')
 
 
 """
@@ -113,5 +129,4 @@ print(cows)
 
 print(greedy_cow_transport(cows, limit))
 print(brute_force_cow_transport(cows, limit))
-
-
+compare_cow_transport_algorithms()
